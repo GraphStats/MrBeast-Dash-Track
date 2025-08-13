@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>YouTube Analytics Dashboard</title>
+
+<!-- Odometer CSS -->
+<link rel="stylesheet" href="https://github.hubspot.com/odometer/themes/odometer-theme-default.css" />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #121212;
+    --card: #1e1e1e;
+    --card-border: #333333;
+    --primary: #3ea6ff;
+    --primary-light: #1a2d40;
+    --secondary: #aaaaaa;
+    --text: #ffffff;
+    --text-light: #aaaaaa;
+    --text-lighter: #707070;
+    --success: #0d9d58;
+    --warning: #ff6f00;
+    --danger: #ff4e45;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html, body {
+    height: 100%;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  /* Odometer custom styles */
+  .odometer {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif !important;
+    font-weight: 600;
+  }
+  .odometer.odometer-auto-theme, .odometer.odometer-theme-default {
+    background: transparent;
+  }
+  .hero .odometer {
+    font-size: 3.5rem;
+    line-height: 1;
+    color: var(--primary);
+  }
+  .extra-item .odometer {
+    font-size: 1.5rem;
+  }
+  .count .odometer, .stat strong .odometer {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-size: inherit;
+  }
+
+  /* Top header */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: var(--card);
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--card-border);
+    display: flex;
+    align-items: center;
+    box-shadow: var(--shadow);
+  }
+  .header-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--primary);
+  }
+  .header-status {
+    display: flex;
+    align-items: center;
+    margin-left: 12px;
+    font-size: 0.85rem;
+    color: var(--text-light);
+  }
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--success);
+    margin-right: 6px;
+  }
+  .header-time {
+    margin-left: auto;
+    font-size: 1.1em;
+    font-weight: 500;
+    color: var(--text-light);
+  }
+
+  /* Main grid */
+  .dashboard {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-auto-rows: minmax(80px, auto);
+    gap: 16px;
+    padding: 20px;
+  }
+
+  /* Base card style */
+  .card {
+    background-color: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 18px;
+    box-shadow: var(--shadow);
+  }
+
+  /* Channel header */
+  .channel-header {
+    grid-column: 1 / span 3;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+  }
+  .channel-logo {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 2px solid var(--primary-light);
+    background-color: #2a2a2a;
+    object-fit: cover;
+  }
+  .channel-info {
+    flex: 1;
+  }
+  .channel-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .subs-line {
+    font-size: 0.9rem;
+    color: var(--text-light);
+  }
+
+  /* Hero - main subscribers count */
+  .hero {
+    grid-column: 1 / span 7;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: var(--card);
+    border-color: var(--card-border);
+  }
+  .hero-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--primary);
+    margin-bottom: 4px;
+  }
+  .big-number {
+    font-weight: 700;
+    margin: 4px 0;
+  }
+  .hero-sub {
+    font-size: 0.85rem;
+    color: var(--text-light);
+  }
+
+  /* Main video card */
+  .video-main {
+    grid-column: 8 / span 5;
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+  .video-thumb {
+    width: 120px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
+    flex-shrink: 0;
+  }
+  .video-title {
+    font-weight: 600;
+    color: var(--text);
+    font-size: 1.2em;
+    margin-bottom: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .stat-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .stat {
+    font-size: 1.2em;
+    color: var(--text-light);
+  }
+  .stat strong {
+    color: var(--text);
+    margin-left: 4px;
+    font-weight: 600;
+  }
+
+  /* Stats row */
+  .extra-stats {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 16px;
+  }
+  .extra-item {
+    grid-column: span 3;
+    text-align: center;
+    padding: 16px;
+  }
+  .extra-item .label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .extra-item .value {
+    display: block;
+    margin-top: 8px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  /* Leaderboard */
+  .leaderboard {
+    grid-column: 1 / span 12;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 16px;
+  }
+  .board {
+    grid-column: span 2;
+    padding: 16px;
+  }
+  .board h4 {
+    margin: 0 0 12px;
+    font-size: 0.85rem;
+    color: var(--text-light);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-top: 1px solid var(--card-border);
+  }
+  .entry:first-of-type {
+    border-top: none;
+  }
+  .name {
+    font-size: 0.9rem;
+    color: var(--text);
+  }
+  .count {
+    font-weight: 600;
+    color: var(--primary);
+  }
+
+  /* Video metrics */
+  .video-metrics {
+    grid-column: 9 / span 4;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .metric {
+    flex: 1 1 180px;
+    padding: 16px;
+    border-radius: 8px;
+    background-color: var(--card);
+  }
+  .metric .k {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    font-weight: 600;
+  }
+  .metric .v {
+    margin-top: 8px;
+    font-weight: 600;
+    font-size: 1.4rem;
+    color: var(--text);
+  }
+
+  /* Responsive */
+  @media (max-width: 1200px) {
+    .channel-header {
+      grid-column: 1 / span 12;
+    }
+    .hero {
+      grid-column: 1 / span 6;
+    }
+    .video-main {
+      grid-column: 7 / span 6;
+    }
+    .leaderboard {
+      grid-column: 1 / span 12;
+      grid-template-columns: repeat(12, 1fr);
+    }
+    .board {
+      grid-column: span 6;
+    }
+    .video-metrics {
+      grid-column: 1 / span 12;
+    }
+  }
+  @media (max-width: 768px) {
+    .hero {
+      grid-column: 1 / span 12;
+    }
+    .video-main {
+      grid-column: 1 / span 12;
+    }
+    .board {
+      grid-column: span 12;
+    }
+    .extra-item {
+      grid-column: span 6;
+    }
+    .hero .odometer {
+      font-size: 5.5em !important;
+    }
+  }
+  @media (max-width: 480px) {
+    .extra-item {
+      grid-column: span 12;
+    }
+    .video-thumb {
+      width: 100px;
+      height: 70px;
+    }
+    .stat-row {
+      gap: 8px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-title">MrBeast Analytics</div>
+  <div class="header-status">
+  </div>
+  <div class="header-time" id="clock">00:00:00</div>
+</div>
+
+<div class="dashboard">
+
+  <!-- Hero - main subscribers count -->
+  <div class="card hero">
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <img src="https://www.banner.yt/UCX6OQ3DkcsbYNE6H8uQQuVA/avatar" alt="MrBeast Logo" style="width:80px;height:80px;border-radius:50%;border:2px solid var(--primary-light);background:#2a2a2a;object-fit:cover;">
+      <div>
+        <div class="hero-label">MrBeast</div>
+        <div class="big-number"><span id="subscribers" class="odometer">0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main video -->
+  <div class="card video-main">
+    <img class="video-thumb" id="video-thumb" src="" alt="Video thumbnail" />
+    <div class="video-stats">
+      <div class="video-title" id="video-title">Loading video data...</div>
+      <div class="stat-row">
+        <div class="stat">Views: <strong><span id="video-views" class="odometer">0</span></strong></div>
+        <div class="stat">Likes: <strong><span id="video-likes" class="odometer">0</span></strong></div>
+        <div class="stat">Comments: <strong><span id="video-comments" class="odometer">0</span></strong></div>
+      </div>
+    </div>
+  </div>
+
+<!-- Leaderboard -->
+<div class="leaderboard">
+  <div class="card board" id="top-channels-card">
+    <h4>Top Channels</h4>
+    <div class="entry" data-channelid="UCX6OQ3DkcsbYNE6H8uQQuVA">
+      <span class="name">Loading...</span>
+      <span class="count"><span class="odometer" id="sub-UCX6OQ3DkcsbYNE6H8uQQuVA">0</span></span>
+    </div>
+    <div class="entry" data-channelid="UCq-Fj5jknLsUf-MWSy4_brA">
+      <span class="name">Loading...</span>
+      <span class="count"><span class="odometer" id="sub-UCq-Fj5jknLsUf-MWSy4_brA">0</span></span>
+    </div>
+    <div class="entry" data-channelid="UCbCmjCuTUZos6Inko4u57UQ">
+      <span class="name">Loading...</span>
+      <span class="count"><span class="odometer" id="sub-UCbCmjCuTUZos6Inko4u57UQ">0</span></span>
+    </div>
+  </div>
+    <div class="card board">
+      <h4>Social Networks</h4>
+      <div class="entry"><span class="name">Twitter</span><span class="count"><span id="tw-count" class="odometer">0</span></span></div>
+      <div class="entry"><span class="name">Instagram</span><span class="count"><span id="ig-count" class="odometer">0</span></span></div>
+      <div class="entry"><span class="name">Total views</span><span class="count"><span id="views-total" class="odometer">0</span></span></div>
+    </div>
+    <div class="card board">
+      <h4>Recent Videos</h4>
+      <div class="entry">
+        <span class="name">1 Subscriber = 1 Second In The Arctic</span>
+        <span class="count"><span class="odometer" id="views-arctic">0</span></span>
+      </div>
+      <div class="entry">
+        <span class="name">Guess What Hit You</span>
+        <span class="count"><span class="odometer" id="views-guess">0</span></span>
+      </div>
+      <div class="entry">
+        <span class="name">$1 = One Year of Clean Water</span>
+        <span class="count"><span class="odometer" id="views-water">0</span></span>
+      </div>
+    </div>
+    <div class="card board">
+      <h4>Other Statistics</h4>
+      <div class="entry"><span class="name">Kylie Jenner</span><span class="count"><span class="odometer">393851602</span></span></div>
+      <div class="entry"><span class="name">MrBeast Gaming</span><span class="count"><span class="odometer">114121</span></span></div>
+      <div class="entry"><span class="name">Statify - Sub</span><span class="count"><span class="odometer">29659</span></span></div>
+    </div>
+  </div>
+
+  <!-- Extra stats -->
+  <div class="extra-stats">
+    <div class="card extra-item">
+      <div class="label">API A</div>
+      <span class="value"><span id="api-a" class="odometer">0</span></span>
+    </div>
+    <div class="card extra-item">
+      <div class="label">API B</div>
+      <span class="value"><span id="api-b" class="odometer">0</span></span>
+    </div>
+  </div>
+
+</div>
+
+<!-- Coin bas-gauche copyright -->
+<div style="
+  position: fixed;
+  left: 2px;
+  bottom: 5px;
+  font-size: 0.9em;
+  color: #aaa;
+  background: rgba(18,18,18,0.85);
+  padding: 4px 12px;
+  border-radius: 8px 8px 8px 0;
+  z-index: 100;
+  pointer-events: none;
+">
+  © 2025 GraphStats / Drayko
+</div>
+
+<!-- Odometer JS -->
+<script src="https://github.hubspot.com/odometer/odometer.js"></script>
+<script>
+  // Example IDs
+  const channelId = 'UCX6OQ3DkcsbYNE6H8uQQuVA';
+  const videoId   = 'Z4hVGCWH1Kc';
+
+  const startTs = Date.now();
+
+  // Odometer initialization
+  const odometers = {};
+  document.querySelectorAll('.odometer').forEach(el => {
+    odometers[el.id] = new Odometer({
+      el: el,
+      value: 0,
+      format: '(,ddd)',
+      theme: 'default'
+    });
+  });
+
+  function fmt(n) {
+    if(n == null || isNaN(n)) return '0';
+    return Number(n);
+  }
+
+  function hhmmss(ms) {
+    const s = Math.max(0, Math.floor(ms/1000));
+    const h = String(Math.floor(s/3600)).padStart(2,'0');
+    const m = String(Math.floor((s%3600)/60)).padStart(2,'0');
+    const ss = String(s%60).padStart(2,'0');
+    return `${h}:${m}:${ss}`;
+  }
+
+  async function fetchTwitterData() {
+    try {
+      const res = await fetch('https://mixerno.space/api/twitter-user-counter/user/MrBeast');
+      if(!res.ok) throw new Error('Twitter API error');
+      const data = await res.json();
+      
+      const followers = data.counts.find(item => item.value === 'followers')?.count || 0;
+      odometers['tw-count'].update(fmt(followers));
+      
+      return followers;
+    } catch(e) {
+      console.error('Twitter error:', e);
+      return null;
+    }
+  }
+
+  async function fetchInstagramData() {
+    try {
+      const res = await fetch('https://mixerno.space/api/instagram-user-counter/user/mrbeast');
+      if(!res.ok) throw new Error('Instagram API error');
+      const data = await res.json();
+      
+      const followers = data.counts.find(item => item.value === 'followers')?.count || 0;
+      odometers['ig-count'].update(fmt(followers));
+      
+      return followers;
+    } catch(e) {
+      console.error('Instagram error:', e);
+      return null;
+    }
+  }
+
+  async function fetchChannelData() {
+    try {
+      const res = await fetch(`https://backend.mixerno.space/api/youtube/estv3/${channelId}`);
+      if(!res.ok) throw new Error('Channel API error');
+      const data = await res.json();
+      if(data.success && data.items?.length) {
+        const ch = data.items[0];
+        const subs = Number(ch.statistics?.subscriberCount || 0);
+
+        odometers['subscribers'].update(fmt(subs));
+      }
+    } catch(e) {
+      console.error(e);
+    }
+  }
+
+  async function fetchVideoData() {
+    try {
+      const res = await fetch(`https://mixerno.space/api/youtube-video-counter/user/${videoId}`);
+      if(!res.ok) throw new Error('Video API error');
+      const data = await res.json();
+
+      const getUser = (k) => data.user?.find(u => u.value === k)?.count;
+      const counts = {};
+      data.counts?.forEach(c => counts[c.value] = c.count || 0);
+
+      const title = getUser('name') || 'Unknown video';
+      const thumb = getUser('pfp') || '';
+
+      const views = Number(counts.views || 0);
+      const likes = Number(counts.likes || 0);
+      const coms = Number(counts.comments || 0);
+
+      const videoTitleEl = document.getElementById('video-title');
+      if (videoTitleEl) videoTitleEl.textContent = title;
+      const videoThumbEl = document.getElementById('video-thumb');
+      if (videoThumbEl) videoThumbEl.src = thumb;
+      
+      // Update odometers
+      if (odometers['video-views']) odometers['video-views'].update(fmt(views));
+      if (odometers['video-likes']) odometers['video-likes'].update(fmt(likes));
+      if (odometers['video-comments']) odometers['video-comments'].update(fmt(coms));
+
+      // Derived metrics
+      const likeRatio = views ? (likes / views) : 0;
+      const cPerK = views ? (coms / (views/1000)) : 0;
+      const engage = views ? ((likes + coms) / views) : 0;
+
+      const engagementEl = document.getElementById('engagement');
+      if (engagementEl) engagementEl.textContent = engage.toFixed(4);
+      const likeRatioEl = document.getElementById('like-ratio');
+      if (likeRatioEl) likeRatioEl.textContent = likeRatio.toFixed(4);
+      const cpmEl = document.getElementById('cpm');
+      if (cpmEl) cpmEl.textContent = cPerK.toFixed(2);
+
+    } catch(e) {
+      console.error(e);
+      const videoTitleEl = document.getElementById('video-title');
+      if (videoTitleEl) videoTitleEl.textContent = 'Loading error';
+    }
+  }
+
+  // Fonction pour récupérer les données de l'API A
+  async function fetchApiA() {
+    try {
+      const res = await fetch('https://backend.mixerno.space/api/youtube/estv3/UCX6OQ3DkcsbYNE6H8uQQuVA');
+      if(!res.ok) throw new Error('API A error');
+      const data = await res.json();
+
+      const ch = data.items[0];
+      const subs = Number(ch.statistics?.subscriberCount || 0);
+      odometers['api-a'].update(fmt(subs));
+      
+      return subs;
+    } catch(e) {
+      console.error('API A error:', e);
+      return null;
+    }
+  }
+
+  // Fonction pour récupérer les données de l'API B
+  async function fetchApiB() {
+    try {
+      const res = await fetch('https://api.socialcounts.org/youtube-live-subscriber-count/UCX6OQ3DkcsbYNE6H8uQQuVA');
+      if(!res.ok) throw new Error('API B error');
+      const data = await res.json();
+      
+      const subs = data.est_sub || 0;
+      odometers['api-b'].update(fmt(subs));
+      
+      return subs;
+    } catch(e) {
+      console.error('API B error:', e);
+      return null;
+    }
+  }
+
+  // Fonction pour calculer la différence entre les deux APIs
+  async function calculateDifference() {
+    const [apiA, apiB] = await Promise.all([fetchApiA(), fetchApiB()]);
+    
+    if(apiA !== null && apiB !== null) {
+      const diff = Math.abs(apiA - apiB);
+      document.getElementById('difference').textContent = diff.toLocaleString();
+    }
+  }
+
+  function tick() {
+    const ms = Date.now() - startTs;
+    const clockEl = document.getElementById('clock');
+    if (clockEl) clockEl.textContent = new Date().toLocaleTimeString();
+    const elapsedEl = document.getElementById('elapsed');
+    if (elapsedEl) elapsedEl.textContent = hhmmss(ms);
+  }
+
+const topChannels = [
+  { id: 'UCX6OQ3DkcsbYNE6H8uQQuVA' }, // MrBeast
+  { id: 'UCq-Fj5jknLsUf-MWSy4_brA' }, // T-Series
+  { id: 'UCbCmjCuTUZos6Inko4u57UQ' }  // Cocomelon
+];
+
+async function fetchTopChannels() {
+  const promises = topChannels.map(async channel => {
+    try {
+      const res = await fetch(`https://backend.mixerno.space/api/youtube/estv3/${channel.id}`);
+      if (!res.ok) throw new Error(`Error fetching channel ${channel.id}`);
+      const data = await res.json();
+      if (data.success && data.items?.length) {
+        const ch = data.items[0];
+        const subs = Number(ch.statistics?.subscriberCount || 0);
+        const name = ch.snippet?.title || 'Unknown';
+        return { id: channel.id, subs, name };
+      }
+    } catch (e) {
+      console.error(e);
+      return { id: channel.id, subs: 0, name: 'Error' };
+    }
+  });
+
+  const results = await Promise.all(promises);
+  results.forEach(({id, subs, name}) => {
+    // Update name
+    const entry = document.querySelector(`.entry[data-channelid="${id}"] .name`);
+    if (entry) entry.textContent = name;
+
+    // Update subscriber count with odometer
+    const odometerEl = document.getElementById(`sub-${id}`);
+    if (odometerEl) {
+      if (!odometers[`sub-${id}`]) {
+        odometers[`sub-${id}`] = new Odometer({
+          el: odometerEl,
+          value: 0,
+          format: '(,ddd)',
+          theme: 'default'
+        });
+      }
+      odometers[`sub-${id}`].update(subs);
+    }
+  });
+}
+
+  // Ajout : fonction pour mettre à jour le total des vues depuis l'API
+  async function fetchTotalViews() {
+    try {
+      const res = await fetch('https://backend.mixerno.space/api/youtube/estv3/UCX6OQ3DkcsbYNE6H8uQQuVA');
+      if (!res.ok) throw new Error('Total views API error');
+      const data = await res.json();
+      if (data.success && data.items?.length) {
+        const viewCount = Number(data.items[0].statistics?.viewCount || 0);
+        if (odometers['views-total']) {
+          odometers['views-total'].update(viewCount);
+        }
+      }
+    } catch (e) {
+      console.error('Total views error:', e);
+    }
+  }
+
+  // Add odometer initialization for recent videos if not already present
+  ['views-arctic', 'views-guess', 'views-water'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !odometers[id]) {
+      odometers[id] = new Odometer({
+        el: el,
+        value: 0,
+        format: '(,ddd)',
+        theme: 'default'
+      });
+    }
+  });
+
+  // Fetch and update view counts for recent videos
+  async function fetchRecentVideosViews() {
+    const videos = [
+      { id: 'vpRW4JhzfSE', odometerId: 'views-arctic' },
+      { id: 'qXW93Cois2s', odometerId: 'views-guess' },
+      { id: 'r7f0L48dHpc', odometerId: 'views-water' }
+    ];
+    await Promise.all(videos.map(async v => {
+      try {
+        const res = await fetch(`https://mixerno.space/api/youtube-video-counter/user/${v.id}`);
+        if (!res.ok) throw new Error('Video API error');
+        const data = await res.json();
+        const views = Number(data.counts?.find(c => c.value === 'views')?.count || 0);
+        if (odometers[v.odometerId]) odometers[v.odometerId].update(views);
+      } catch (e) {
+        console.error(`Error fetching views for ${v.id}:`, e);
+      }
+    }));
+  }
+
+  async function updateAll() {
+    await Promise.all([
+      fetchChannelData(), 
+      fetchVideoData(),
+      fetchTwitterData(),
+      fetchInstagramData(),
+      calculateDifference(),
+      fetchTopChannels(),
+      fetchTotalViews(),
+      fetchRecentVideosViews() // Add this line to update recent videos views
+    ]);
+  }
+
+  // Initialization
+  updateAll();
+  tick();
+  setInterval(updateAll, 1985);
+  setInterval(tick, 200);
+  setInterval(fetchTopChannels, 1985);
+
+function updateConnectivityIcons() {
+  updateWifiIcon();
+  updateBatteryIcon();
+  updateEthernetIcon();
+}
+setInterval(updateConnectivityIcons, 1800);
+updateConnectivityIcons();
+</script>
+
+</body>
+</html>
